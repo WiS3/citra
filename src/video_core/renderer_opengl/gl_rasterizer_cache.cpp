@@ -24,6 +24,8 @@
 #include "video_core/utils.h"
 #include "video_core/video_core.h"
 
+#include "video_core/filtering/texture_filterer.h"
+
 struct FormatTuple {
     GLint internal_format;
     GLenum format;
@@ -241,6 +243,9 @@ CachedSurface* RasterizerCacheOpenGL::GetSurface(const CachedSurface& params, bo
     CachedSurface* best_exact_surface = nullptr;
     float exact_surface_goodness = -1.f;
 
+    // Ignore this texture for scaling if we have seen it before
+    bool ignore_scaling = false;
+
     auto surface_interval =
         boost::icl::interval<PAddr>::right_open(params.addr, params.addr + params_size);
     auto range = surface_cache.equal_range(surface_interval);
@@ -265,6 +270,8 @@ CachedSurface* RasterizerCacheOpenGL::GetSurface(const CachedSurface& params, bo
                     }
                 }
             }
+
+            ignore_scaling = true;
         }
     }
 
@@ -355,8 +362,18 @@ CachedSurface* RasterizerCacheOpenGL::GetSurface(const CachedSurface& params, bo
                     }
                 }
 
-                glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height,
-                             0, GL_RGBA, GL_UNSIGNED_BYTE, tex_buffer.data());
+                if (Filtering::isScalingEnabled() && !ignore_scaling) {
+                    std::vector<Math::Vec4<u8>> tex_buffer_scaled(Filtering::getScaledTextureSize(tex_info.format, tex_info.width, tex_info.height));
+
+                    // TODO: Specify FilteringType from frontend
+                    Filtering::filterTexture(Filtering::FilteringTypes::XBR, tex_info, (unsigned int *) tex_buffer.data(), (unsigned int *) tex_buffer_scaled.data());
+
+                    glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width * Filtering::scale, params.height * Filtering::scale,
+                        0, GL_RGBA, GL_UNSIGNED_BYTE, tex_buffer_scaled.data());
+                } else {
+                    glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height,
+                        0, GL_RGBA, GL_UNSIGNED_BYTE, tex_buffer.data());
+                }
             } else {
                 // Depth/Stencil formats need special treatment since they aren't sampleable using
                 // LookupTexture and can't use RGBA format
@@ -710,7 +727,7 @@ void RasterizerCacheOpenGL::FlushSurface(CachedSurface* surface) {
 
             u32 bytes_per_pixel = CachedSurface::GetFormatBpp(surface->pixel_format) / 8;
 
-            std::vector<u8> temp_gl_buffer(surface->width * surface->height * bytes_per_pixel);
+            std::vector<u8> temp_gl_buffer(Filtering::getScaledTextureSize((Pica::Regs::TextureFormat) surface->pixel_format, surface->width, surface->height) * bytes_per_pixel);
 
             glGetTexImage(GL_TEXTURE_2D, 0, tuple.format, tuple.type, temp_gl_buffer.data());
 
