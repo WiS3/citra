@@ -23,6 +23,9 @@ void Apply() {
     VideoCore::g_scaled_resolution_enabled = values.use_scaled_resolution;
     VideoCore::g_toggle_framelimit_enabled = values.toggle_framelimit;
 
+    // Ensure that texture caches are empty
+    VideoCore::g_is_rasterizer_dirty = true;
+
     if (VideoCore::g_emu_window) {
         auto layout = VideoCore::g_emu_window->GetFramebufferLayout();
         VideoCore::g_emu_window->UpdateCurrentFramebufferLayout(layout.width, layout.height);

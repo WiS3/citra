@@ -99,6 +99,9 @@ struct Values {
     float bg_green;
     float bg_blue;
 
+    int tex_filter;
+    int tex_filter_scaling;
+
     std::string log_filter;
 
     // Audio

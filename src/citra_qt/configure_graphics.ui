@@ -63,6 +63,98 @@
     </layout>
    </item>
    <item>
+    <widget class="QGroupBox" name="groupBox">
+      <property name="title">
+        <string>Filtering</string>
+      </property>
+      <layout class="QGridLayout" name="verticalLayout_3">
+        <item row="0" column="0">
+          <widget class="QLabel" name="label_filtering_type">
+            <property name="text">
+              <string>Texture Mode:</string>
+            </property>
+          </widget>
+        </item>
+        <item row="0" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_filtering">
+            <item>
+              <widget class="QComboBox" name="combo_filtering">
+                <item>
+                  <property name="text">
+                    <string>Disabled</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string>xBRZ</string>
+                  </property>
+                </item>
+              </widget>
+            </item>
+          </layout>
+        </item>
+        <item row="1" column="0">
+          <widget class="QLabel" name="label_filtering_type">
+            <property name="text">
+              <string>Scale:</string>
+            </property>
+          </widget>
+        </item>
+        <item row="1" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_filtering_scale">
+            <item>
+              <widget class="QSlider" name="slider_filtering_scale">
+                <property name="minimum">
+                  <number>1</number>
+                </property>
+                <property name="maximum">
+                  <number>6</number>
+                </property>
+                <property name="tickInterval">
+                  <number>1</number>
+                </property>
+                <property name="tickPosition">
+                  <enum>QSlider::TicksBelow</enum>
+                </property>
+                <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                </property>
+              </widget>
+            </item>
+          </layout>
+        </item>
+        <item row="2" column="1">
+          <layout class="QHBoxLayout" name="horizontalLayout_filtering_scale_names">
+            <item>
+              <layout class="QGridLayout" name="verticalLayout_filtering_scale_names">
+                <item row="0" column="0">
+                  <widget class="QLabel" name="label_filtering_scale_names_x2">
+                    <property name="text">
+                      <string>x1</string>
+                    </property>
+                    <property name="alignment">
+                      <enum>Qt::AlignLeft</enum>
+                    </property>
+                  </widget>
+                </item>
+                <item row="0" column="1">
+                  <widget class="QLabel" name="label_filtering_scale_names_x6">
+                    <property name="text">
+                      <string>x6</string>
+                    </property>
+                    <property name="alignment">
+                      <enum>Qt::AlignRight</enum>
+                    </property>
+                  </widget>
+                </item>
+              </layout>
+            </item>
+          </layout>
+        </item>
+      </layout>
+    </widget>
+  </item>
+   <item>
     <widget class="QGroupBox" name="groupBox2">
      <property name="title">
       <string>Layout</string>

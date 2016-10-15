@@ -9,21 +9,24 @@
 
 namespace Filtering {
 
-// TODO: Dynamic config of this
-// 1-6, 1 disables
-const int scale = 6;
-
 enum class FilteringTypes {
-    XBR = 0,
+    NONE = 0,
+    XBRZ = 1,
 };
 
 // Checks if scaling is enabled
-const bool isScalingEnabled();
+bool isScalingEnabled();
+
+// Returns the currently configured scaling size
+int getScaling();
+
+// Returns the currently configured scaling type
+Filtering::FilteringTypes getScalingType();
 
 // Filters a texture using the specified texture
-void filterTexture(FilteringTypes type, Pica::DebugUtils::TextureInfo tex_info, unsigned int * fromBuffer, unsigned int * toBuffer);
+void filterTexture(Pica::DebugUtils::TextureInfo tex_info, unsigned int* fromBuffer,
+                   unsigned int* toBuffer);
 
 // Returns the scaled texture size (width * height) of this texture
 int getScaledTextureSize(Pica::Regs::TextureFormat format, int width, int height);
-
 }

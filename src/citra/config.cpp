@@ -73,6 +73,10 @@ void Config::ReadValues() {
     Settings::values.bg_green = (float)sdl2_config->GetReal("Renderer", "bg_green", 1.0);
     Settings::values.bg_blue = (float)sdl2_config->GetReal("Renderer", "bg_blue", 1.0);
 
+    Settings::values.tex_filter = sdl2_config->GetInteger("Renderer", "tex_filter", 0);
+    Settings::values.tex_filter_scaling =
+        sdl2_config->GetInteger("Renderer", "tex_filter_scaling", 1);
+
     // Layout
     Settings::values.layout_option =
         static_cast<Settings::LayoutOption>(sdl2_config->GetInteger("Layout", "layout_option", 0));

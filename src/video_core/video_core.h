@@ -39,6 +39,7 @@ extern std::atomic<bool> g_hw_renderer_enabled;
 extern std::atomic<bool> g_shader_jit_enabled;
 extern std::atomic<bool> g_scaled_resolution_enabled;
 extern std::atomic<bool> g_toggle_framelimit_enabled;
+extern std::atomic<bool> g_is_rasterizer_dirty;
 
 /// Start the video core
 void Start();
