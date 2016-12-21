@@ -172,7 +172,6 @@ struct Values {
     std::string sink_id;
     bool enable_audio_stretching;
 
-    // Camera
     std::array<std::string, Service::CAM::NumCameras> camera_name;
     std::array<std::string, Service::CAM::NumCameras> camera_config;
 

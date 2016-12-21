@@ -101,18 +101,18 @@ enable_audio_stretching =
 [Camera]
 # Which camera engine to use for the right outer camera
 # blank (default): a dummy camera that always returns black image
-camera_outer_right_name =
+camera_out_right_name =
 
 # A config string for the right outer camera. Its meaning is defined by the camera engine
-camera_outer_right_config =
+camera_out_right_config =
 
 # ... for the left outer camera
-camera_outer_left_name =
-camera_outer_left_config =
+camera_out_left_name =
+camera_out_left_config =
 
 # ... for the inner camera
-camera_inner_name =
-camera_inner_config =
+camera_in_name =
+camera_in_config =
 
 [Data Storage]
 # Whether to create a virtual SD card.
