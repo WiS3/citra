@@ -3,8 +3,8 @@
 // Refer to the license.txt file included.
 
 #include <cmath>
-#include "common/emu_window.h"
 
+#include "core/frontend/emu_window.h"
 #include "core/hle/service/hid/hid.h"
 #include "core/hle/service/hid/hid_spvr.h"
 #include "core/hle/service/hid/hid_user.h"

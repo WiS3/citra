@@ -14,7 +14,6 @@
 #include "common/string_util.h"
 #include "core/core.h"
 #include "core/settings.h"
-#include "core/system.h"
 
 #include "input_core/devices/keyboard.h"
 #include "input_core/input_core.h"
