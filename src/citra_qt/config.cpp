@@ -46,6 +46,7 @@ void Config::ReadValues() {
     Settings::values.use_shader_jit = qt_config->value("use_shader_jit", true).toBool();
     Settings::values.use_scaled_resolution =
         qt_config->value("use_scaled_resolution", false).toBool();
+    Settings::values.resolution_factor = qt_config->value("resolution_factor", 0.0).toFloat();
     Settings::values.use_vsync = qt_config->value("use_vsync", false).toBool();
     Settings::values.toggle_framelimit = qt_config->value("toggle_framelimit", true).toBool();
 
@@ -153,6 +154,7 @@ void Config::SaveValues() {
     qt_config->setValue("use_hw_renderer", Settings::values.use_hw_renderer);
     qt_config->setValue("use_shader_jit", Settings::values.use_shader_jit);
     qt_config->setValue("use_scaled_resolution", Settings::values.use_scaled_resolution);
+    qt_config->setValue("resolution_factor", (double)Settings::values.resolution_factor);
     qt_config->setValue("use_vsync", Settings::values.use_vsync);
     qt_config->setValue("toggle_framelimit", Settings::values.toggle_framelimit);
 
