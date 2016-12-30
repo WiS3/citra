@@ -21,6 +21,7 @@
 #include "video_core/pica_state.h"
 #include "video_core/renderer_opengl/gl_rasterizer_cache.h"
 #include "video_core/renderer_opengl/gl_state.h"
+#include "video_core/texture_codecs/codecs.h"
 #include "video_core/utils.h"
 #include "video_core/video_core.h"
 
@@ -52,55 +53,6 @@ RasterizerCacheOpenGL::RasterizerCacheOpenGL() {
 
 RasterizerCacheOpenGL::~RasterizerCacheOpenGL() {
     FlushAll();
-}
-
-static void MortonCopyPixels(CachedSurface::PixelFormat pixel_format, u32 width, u32 height,
-                             u32 bytes_per_pixel, u32 gl_bytes_per_pixel, u8* morton_data,
-                             u8* gl_data, bool morton_to_gl) {
-    using PixelFormat = CachedSurface::PixelFormat;
-
-    u8* data_ptrs[2];
-    u32 depth_stencil_shifts[2] = {24, 8};
-
-    if (morton_to_gl) {
-        std::swap(depth_stencil_shifts[0], depth_stencil_shifts[1]);
-    }
-
-    if (pixel_format == PixelFormat::D24S8) {
-        for (unsigned y = 0; y < height; ++y) {
-            for (unsigned x = 0; x < width; ++x) {
-                const u32 coarse_y = y & ~7;
-                u32 morton_offset = VideoCore::GetMortonOffset(x, y, bytes_per_pixel) +
-                                    coarse_y * width * bytes_per_pixel;
-                u32 gl_pixel_index = (x + (height - 1 - y) * width) * gl_bytes_per_pixel;
-
-                data_ptrs[morton_to_gl] = morton_data + morton_offset;
-                data_ptrs[!morton_to_gl] = &gl_data[gl_pixel_index];
-
-                // Swap depth and stencil value ordering since 3DS does not match OpenGL
-                u32 depth_stencil;
-                memcpy(&depth_stencil, data_ptrs[1], sizeof(u32));
-                depth_stencil = (depth_stencil << depth_stencil_shifts[0]) |
-                                (depth_stencil >> depth_stencil_shifts[1]);
-
-                memcpy(data_ptrs[0], &depth_stencil, sizeof(u32));
-            }
-        }
-    } else {
-        for (unsigned y = 0; y < height; ++y) {
-            for (unsigned x = 0; x < width; ++x) {
-                const u32 coarse_y = y & ~7;
-                u32 morton_offset = VideoCore::GetMortonOffset(x, y, bytes_per_pixel) +
-                                    coarse_y * width * bytes_per_pixel;
-                u32 gl_pixel_index = (x + (height - 1 - y) * width) * gl_bytes_per_pixel;
-
-                data_ptrs[morton_to_gl] = morton_data + morton_offset;
-                data_ptrs[!morton_to_gl] = &gl_data[gl_pixel_index];
-
-                memcpy(data_ptrs[0], data_ptrs[1], bytes_per_pixel);
-            }
-        }
-    }
 }
 
 void RasterizerCacheOpenGL::BlitTextures(GLuint src_tex, GLuint dst_tex,
@@ -224,6 +176,175 @@ static void AllocateSurfaceTexture(GLuint texture, CachedSurface::PixelFormat pi
     cur_state.Apply();
 }
 
+// TODO: refactor this function into a factory method, sepparating format decoding
+// from ogl texture loading. Thus the decoder could be used for different backends.
+static void DecodeTexture(const CachedSurface& params, u8* texture_src_data, FormatTuple tuple) {
+    CachedSurface::PixelFormat format = params.pixel_format;
+    int invalid_conditions = 0;
+    invalid_conditions |= (texture_src_data == nullptr);
+    invalid_conditions |= (params.width < 8);
+    invalid_conditions |= (params.height < 8);
+    if (invalid_conditions != 0) {
+        LOG_CRITICAL(Render_OpenGL, "Invalid texture sent to the texture decoder!");
+        return;
+    }
+    switch (format) {
+    case CachedSurface::PixelFormat::RGBA8: {
+        std::unique_ptr<u8[]> tmp(new u8[params.width * params.height * 4]);
+        u8* tex_buffer = tmp.get();
+        u8* in_buffer = texture_src_data;
+        Pica::Decoders::Morton(in_buffer, tex_buffer, params.width, params.height, 4);
+        Pica::Decoders::BigEndian(tex_buffer, params.width, params.height);
+        glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height, 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, tex_buffer);
+        return;
+    }
+    case CachedSurface::PixelFormat::RGB8: {
+        std::unique_ptr<u8[]> tmp(new u8[params.width * params.height * 3]);
+        u8* tex_buffer = tmp.get();
+        Pica::Decoders::Morton(texture_src_data, tex_buffer, params.width, params.height, 3);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height, 0,
+                     GL_BGR, GL_UNSIGNED_BYTE, tex_buffer);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        return;
+    }
+    case CachedSurface::PixelFormat::RGB5A1: {
+        std::unique_ptr<u8[]> tmp(new u8[params.width * params.height * 2]);
+        u8* tex_buffer = tmp.get();
+        u8* in_buffer = texture_src_data;
+        Pica::Decoders::Morton(in_buffer, tex_buffer, params.width, params.height, 2);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+        glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height, 0,
+                     GL_RGBA, GL_UNSIGNED_SHORT_5_5_5_1, tex_buffer);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        return;
+    }
+    case CachedSurface::PixelFormat::RGB565: {
+        std::unique_ptr<u8[]> tmp(new u8[params.width * params.height * 2]);
+        u8* tex_buffer = tmp.get();
+        u8* in_buffer = texture_src_data;
+        Pica::Decoders::Morton(in_buffer, tex_buffer, params.width, params.height, 2);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+        glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height, 0,
+                     GL_RGB, GL_UNSIGNED_SHORT_5_6_5, tex_buffer);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        return;
+    }
+    case CachedSurface::PixelFormat::RGBA4: {
+        std::unique_ptr<u8[]> tmp(new u8[params.width * params.height * 2]);
+        u8* tex_buffer = tmp.get();
+        u8* in_buffer = texture_src_data;
+        Pica::Decoders::Morton(in_buffer, tex_buffer, params.width, params.height, 2);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+        glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height, 0,
+                     GL_RGBA, GL_UNSIGNED_SHORT_4_4_4_4, tex_buffer);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        return;
+    }
+    case CachedSurface::PixelFormat::IA8: {
+        std::unique_ptr<u8[]> tmp(new u8[params.width * params.height * 4]);
+        u8* tex_buffer = tmp.get();
+        u8* in_buffer = texture_src_data;
+        Pica::Decoders::Morton(in_buffer, tex_buffer, params.width, params.height, 2);
+        Pica::Decoders::IA8(tex_buffer, params.width, params.height);
+        glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height, 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, tex_buffer);
+        return;
+    }
+    case CachedSurface::PixelFormat::RG8: {
+        std::unique_ptr<u8[]> tmp(new u8[params.width * params.height * 4]);
+        u8* tex_buffer = tmp.get();
+        u8* in_buffer = texture_src_data;
+        Pica::Decoders::Morton(in_buffer, tex_buffer, params.width, params.height, 2);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+        glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height, 0, GL_RG,
+                     GL_UNSIGNED_BYTE, tex_buffer);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        return;
+    }
+    case CachedSurface::PixelFormat::I8: {
+        std::unique_ptr<u8[]> tmp(new u8[params.width * params.height * 4]);
+        u8* tex_buffer = tmp.get();
+        u8* in_buffer = texture_src_data;
+        Pica::Decoders::Morton(in_buffer, tex_buffer, params.width, params.height, 1);
+        Pica::Decoders::I8(tex_buffer, params.width, params.height);
+        glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height, 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, tex_buffer);
+        return;
+    }
+    case CachedSurface::PixelFormat::A8: {
+        std::unique_ptr<u8[]> tmp(new u8[params.width * params.height * 4]);
+        u8* tex_buffer = tmp.get();
+        u8* in_buffer = texture_src_data;
+        Pica::Decoders::Morton(in_buffer, tex_buffer, params.width, params.height, 1);
+        Pica::Decoders::A8(tex_buffer, params.width, params.height);
+        glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height, 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, tex_buffer);
+        return;
+    }
+    case CachedSurface::PixelFormat::D16: {
+        std::unique_ptr<u8[]> tmp(new u8[params.width * params.height * 2]);
+        u8* tex_buffer = tmp.get();
+        u8* in_buffer = texture_src_data;
+        Pica::Decoders::Morton(in_buffer, tex_buffer, params.width, params.height, 2);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 2);
+        glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height, 0,
+                     tuple.format, tuple.type, tex_buffer);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        return;
+    }
+    case CachedSurface::PixelFormat::D24: {
+        std::unique_ptr<u8[]> tmp(new u8[params.width * params.height * 3]);
+        u8* tex_buffer = tmp.get();
+        Pica::Decoders::Morton(texture_src_data, tex_buffer, params.width, params.height, 3);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height, 0,
+                     tuple.format, tuple.type, tex_buffer);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        return;
+    }
+    case CachedSurface::PixelFormat::D24S8: {
+        std::unique_ptr<u8[]> tmp(new u8[params.width * params.height * 4]);
+        u8* tex_buffer = tmp.get();
+        u8* in_buffer = texture_src_data;
+        Pica::Decoders::Morton(in_buffer, tex_buffer, params.width, params.height, 4);
+        Pica::Decoders::Depth(tex_buffer, params.width, params.height);
+        glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height, 0,
+                     tuple.format, tuple.type, tex_buffer);
+        // FIXME: swizzle requires to be set up on glstate in order to work
+        // correctly.
+        // GLint swiz[4] = {GL_GREEN, GL_BLUE, GL_ALPHA, GL_RED};
+        // glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swiz);
+        return;
+    }
+    // TODO: ETC1 and ETCA4 need a decoder
+    // Fallback to LookupTexture
+    case CachedSurface::PixelFormat::ETC1:
+    case CachedSurface::PixelFormat::ETC1A4:
+    default: { break; }
+    }
+    u32* tex_buffer = new u32[params.width * params.height];
+    Pica::DebugUtils::TextureInfo tex_info;
+    tex_info.width = params.width;
+    tex_info.height = params.height;
+    tex_info.stride = params.width * CachedSurface::GetFormatBpp(params.pixel_format) / 8;
+    tex_info.format = (Pica::Regs::TextureFormat)params.pixel_format;
+    tex_info.physical_address = params.addr;
+
+    for (unsigned y = 0; y < params.height; ++y) {
+        for (unsigned x = 0; x < params.width; ++x) {
+            Math::Vec4<u8> v = Pica::DebugUtils::LookupTexture(texture_src_data, x,
+                                                               params.height - 1 - y, tex_info);
+            tex_buffer[x + y * params.width] = *reinterpret_cast<u32*>(v.AsArray());
+        }
+    }
+    glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height, 0, GL_RGBA,
+                 GL_UNSIGNED_BYTE, tex_buffer);
+    delete tex_buffer;
+    return;
+}
+
 MICROPROFILE_DEFINE(OpenGL_SurfaceUpload, "OpenGL", "Surface Upload", MP_RGB(128, 64, 192));
 CachedSurface* RasterizerCacheOpenGL::GetSurface(const CachedSurface& params, bool match_res_scale,
                                                  bool load_if_create) {
@@ -337,52 +458,14 @@ CachedSurface* RasterizerCacheOpenGL::GetSurface(const CachedSurface& params, bo
                     // Texture
                     tuple = {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
                 }
-
-                std::vector<Math::Vec4<u8>> tex_buffer(params.width * params.height);
-
-                Pica::DebugUtils::TextureInfo tex_info;
-                tex_info.width = params.width;
-                tex_info.height = params.height;
-                tex_info.stride =
-                    params.width * CachedSurface::GetFormatBpp(params.pixel_format) / 8;
-                tex_info.format = (Pica::Regs::TextureFormat)params.pixel_format;
-                tex_info.physical_address = params.addr;
-
-                for (unsigned y = 0; y < params.height; ++y) {
-                    for (unsigned x = 0; x < params.width; ++x) {
-                        tex_buffer[x + params.width * y] = Pica::DebugUtils::LookupTexture(
-                            texture_src_data, x, params.height - 1 - y, tex_info);
-                    }
-                }
-
-                glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height,
-                             0, GL_RGBA, GL_UNSIGNED_BYTE, tex_buffer.data());
+                DecodeTexture(params, texture_src_data, tuple);
             } else {
                 // Depth/Stencil formats need special treatment since they aren't sampleable using
                 // LookupTexture and can't use RGBA format
                 size_t tuple_idx = (size_t)params.pixel_format - 14;
                 ASSERT(tuple_idx < depth_format_tuples.size());
                 const FormatTuple& tuple = depth_format_tuples[tuple_idx];
-
-                u32 bytes_per_pixel = CachedSurface::GetFormatBpp(params.pixel_format) / 8;
-
-                // OpenGL needs 4 bpp alignment for D24 since using GL_UNSIGNED_INT as type
-                bool use_4bpp = (params.pixel_format == PixelFormat::D24);
-
-                u32 gl_bytes_per_pixel = use_4bpp ? 4 : bytes_per_pixel;
-
-                std::vector<u8> temp_fb_depth_buffer(params.width * params.height *
-                                                     gl_bytes_per_pixel);
-
-                u8* temp_fb_depth_buffer_ptr =
-                    use_4bpp ? temp_fb_depth_buffer.data() + 1 : temp_fb_depth_buffer.data();
-
-                MortonCopyPixels(params.pixel_format, params.width, params.height, bytes_per_pixel,
-                                 gl_bytes_per_pixel, texture_src_data, temp_fb_depth_buffer_ptr,
-                                 true);
-
-                glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width, params.height,
-                             0, tuple.format, tuple.type, temp_fb_depth_buffer.data());
+                DecodeTexture(params, texture_src_data, tuple);
             }
         }
 
@@ -716,9 +799,8 @@ void RasterizerCacheOpenGL::FlushSurface(CachedSurface* surface) {
 
             // Directly copy pixels. Internal OpenGL color formats are consistent so no conversion
             // is necessary.
-            MortonCopyPixels(surface->pixel_format, surface->width, surface->height,
-                             bytes_per_pixel, bytes_per_pixel, dst_buffer, temp_gl_buffer.data(),
-                             false);
+            Pica::Encoders::Morton(temp_gl_buffer.data(), dst_buffer, surface->width,
+                                   surface->height, bytes_per_pixel);
         } else {
             // Depth/Stencil formats need special treatment since they aren't sampleable using
             // LookupTexture and can't use RGBA format
@@ -730,18 +812,32 @@ void RasterizerCacheOpenGL::FlushSurface(CachedSurface* surface) {
 
             // OpenGL needs 4 bpp alignment for D24 since using GL_UNSIGNED_INT as type
             bool use_4bpp = (surface->pixel_format == PixelFormat::D24);
-
             u32 gl_bytes_per_pixel = use_4bpp ? 4 : bytes_per_pixel;
 
             std::vector<u8> temp_gl_buffer(surface->width * surface->height * gl_bytes_per_pixel);
 
+            glPixelStorei(GL_PACK_ALIGNMENT, 1);
             glGetTexImage(GL_TEXTURE_2D, 0, tuple.format, tuple.type, temp_gl_buffer.data());
+            glPixelStorei(GL_PACK_ALIGNMENT, 4);
 
-            u8* temp_gl_buffer_ptr = use_4bpp ? temp_gl_buffer.data() + 1 : temp_gl_buffer.data();
-
-            MortonCopyPixels(surface->pixel_format, surface->width, surface->height,
-                             bytes_per_pixel, gl_bytes_per_pixel, dst_buffer, temp_gl_buffer_ptr,
-                             false);
+            switch (surface->pixel_format) {
+            case PixelFormat::D24: {
+                Pica::Encoders::Morton(temp_gl_buffer.data(), dst_buffer, surface->width,
+                                       surface->height, 3);
+                break;
+            }
+            case PixelFormat::D24S8: {
+                Pica::Encoders::Morton(temp_gl_buffer.data(), dst_buffer, surface->width,
+                                       surface->height, 4);
+                Pica::Encoders::Depth(dst_buffer, surface->width, surface->height);
+                break;
+            }
+            default: {
+                Pica::Encoders::Morton(temp_gl_buffer.data(), dst_buffer, surface->width,
+                                       surface->height, bytes_per_pixel);
+                break;
+            }
+            }
         }
     }
 
