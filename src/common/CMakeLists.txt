@@ -56,6 +56,7 @@ set(HEADERS
             thread_queue_list.h
             timer.h
             vector_math.h
+            vectorize.h
             )
 
 if(ARCHITECTURE_x86_64)
