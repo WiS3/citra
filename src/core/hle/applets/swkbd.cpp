@@ -4,6 +4,8 @@
 
 #include <cstring>
 #include <string>
+#include <windows.h>
+#include <iostream>
 #include "common/assert.h"
 #include "common/logging/log.h"
 #include "common/string_util.h"
@@ -75,18 +77,54 @@ ResultCode SoftwareKeyboard::StartImpl(Service::APT::AppletStartupParameter cons
 }
 
 void SoftwareKeyboard::Update() {
+				auto hwnd = GetConsoleWindow();
+			auto hforewnd = GetForegroundWindow();
+			HANDLE hcout = GetStdHandle(STD_OUTPUT_HANDLE);
+			CONSOLE_SCREEN_BUFFER_INFO coutbfInfo;
+			GetConsoleScreenBufferInfo(hcout, &coutbfInfo);
+			bool a = coutbfInfo.srWindow.Top - (coutbfInfo.srWindow.Bottom - coutbfInfo.srWindow.Top) >= 0;
+			if (a) {
+				coutbfInfo.srWindow.Top = coutbfInfo.srWindow.Bottom;
+				SetConsoleWindowInfo(hcout, true, &coutbfInfo.srWindow);
+			}
+
+			ShowWindow(hwnd, SW_MINIMIZE);
+			ShowWindow(hwnd, SW_RESTORE);
+
+			std::cout << "Use the keypad to enter English or numbers and press Enter ：";
+			std::string ch;
+			std::cin >> ch;
+			ShowWindow(hwnd, SW_MINIMIZE);
+			SetForegroundWindow(hforewnd);
+			SetFocus(hforewnd);
+			SetActiveWindow(hforewnd);
+	
     // TODO(Subv): Handle input using the touch events from the HID module
 
     // TODO(Subv): Remove this hardcoded text
+	std::string ctext;
+	std::getline(std::cin, ctext, '\n');
     std::u16string text = Common::UTF8ToUTF16("Citra");
     memcpy(text_memory->GetPointer(), text.c_str(), text.length() * sizeof(char16_t));
 
     // TODO(Subv): Ask for input and write it to the shared memory
     // TODO(Subv): Find out what are the possible values for the return code,
     // some games seem to check for a hardcoded 2
-    config.return_code = 2;
-    config.text_length = 6;
-    config.text_offset = 0;
+			config.return_code = 2;
+			config.text_length = text.length();
+			config.text_offset = 0;
+
+			std::vector<std::pair<std::string, std::string>> gamenameid{
+			{ "Yu-Gi-Oh Zexal World Duel Carnival", "0004000000132B00" },
+			{ "Yu-Gi-Oh! Zexal - Gekitotsu Duel Carnival", "00040000000F6C00" },
+			{ "Gundam Try Age SP", "000400000012FB00" },
+			};
+
+			std::string titleid = Common::StringFromFormat("%016llX", Kernel::g_current_process->codeset->program_id);
+			for (std::vector<std::pair <std::string, std::string>>::iterator it = gamenameid.begin(); it != gamenameid.end(); ++it) {
+				if (it->second == titleid)
+					config.return_code = 0;
+			}
 
     // TODO(Subv): We're finalizing the applet immediately after it's started,
     // but we should defer this call until after all the input has been collected.
