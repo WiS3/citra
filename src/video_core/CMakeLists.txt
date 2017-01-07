@@ -6,6 +6,7 @@ set(SRCS
             renderer_opengl/gl_state.cpp
             renderer_opengl/renderer_opengl.cpp
             debug_utils/debug_utils.cpp
+            texture_codecs/codecs.cpp
             clipper.cpp
             command_processor.cpp
             pica.cpp
@@ -21,6 +22,7 @@ set(SRCS
 
 set(HEADERS
             debug_utils/debug_utils.h
+            texture_codecs/codecs.h
             renderer_opengl/gl_rasterizer.h
             renderer_opengl/gl_rasterizer_cache.h
             renderer_opengl/gl_resource_manager.h
