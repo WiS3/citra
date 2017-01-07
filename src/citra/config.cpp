@@ -65,6 +65,7 @@ void Config::ReadValues() {
     Settings::values.use_shader_jit = sdl2_config->GetBoolean("Renderer", "use_shader_jit", true);
     Settings::values.use_scaled_resolution =
         sdl2_config->GetBoolean("Renderer", "use_scaled_resolution", false);
+    Settings::values.resolution_factor = sdl2_config->GetReal("Renderer", "resolution_factor", 0.0);
     Settings::values.use_vsync = sdl2_config->GetBoolean("Renderer", "use_vsync", false);
     Settings::values.toggle_framelimit =
         sdl2_config->GetBoolean("Renderer", "toggle_framelimit", true);
