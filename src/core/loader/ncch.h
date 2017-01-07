@@ -157,7 +157,6 @@ static_assert(sizeof(ExHeader_Header) == 0x800, "ExHeader structure size is wron
 // Loader namespace
 
 namespace Loader {
-
 /// Loads an NCCH file (e.g. from a CCI, or the first NCCH in a CXI)
 class AppLoader_NCCH final : public AppLoader {
 public:

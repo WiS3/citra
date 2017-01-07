@@ -21,10 +21,8 @@
 // Loader namespace
 
 namespace Loader {
-
 static const int kMaxSections = 8;   ///< Maximum number of sections (files) in an ExeFs
 static const int kBlockSize = 0x200; ///< Size of ExeFS blocks (in bytes)
-
 /**
  * Get the decompressed size of an LZSS compressed ExeFS file
  * @param buffer Buffer of compressed file
