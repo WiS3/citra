@@ -345,24 +345,23 @@ CachedSurface* RasterizerCacheOpenGL::GetSurface(const CachedSurface& params, bo
                     tuple = {GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE};
                 }
 
-                std::vector<Math::Vec4<u8>> tex_buffer(params.width * params.height);
-
-                Pica::DebugUtils::TextureInfo tex_info;
-                tex_info.width = params.width;
-                tex_info.height = params.height;
-                tex_info.stride =
-                    params.width * CachedSurface::GetFormatBpp(params.pixel_format) / 8;
-                tex_info.format = (Pica::Regs::TextureFormat)params.pixel_format;
-                tex_info.physical_address = params.addr;
-
-                for (unsigned y = 0; y < params.height; ++y) {
-                    for (unsigned x = 0; x < params.width; ++x) {
-                        tex_buffer[x + params.width * y] = Pica::DebugUtils::LookupTexture(
-                            texture_src_data, x, params.height - 1 - y, tex_info);
-                    }
-                }
-
                 if (Filtering::isScalingEnabled() && !ignore_scaling) {
+                    std::vector<Math::Vec4<u8>> tex_buffer(params.width * params.height);
+
+                    Pica::DebugUtils::TextureInfo tex_info;
+                    tex_info.width = params.width;
+                    tex_info.height = params.height;
+                    tex_info.stride =
+                        params.width * CachedSurface::GetFormatBpp(params.pixel_format) / 8;
+                    tex_info.format = (Pica::Regs::TextureFormat)params.pixel_format;
+                    tex_info.physical_address = params.addr;
+
+                    for (unsigned y = 0; y < params.height; ++y) {
+                        for (unsigned x = 0; x < params.width; ++x) {
+                            tex_buffer[x + params.width * y] = Pica::DebugUtils::LookupTexture(
+                                texture_src_data, x, params.height - 1 - y, tex_info);
+                        }
+                    }
                     int scaling = Filtering::getScaling();
 
                     std::vector<Math::Vec4<u8>> tex_buffer_scaled(Filtering::getScaledTextureSize(
@@ -376,8 +375,7 @@ CachedSurface* RasterizerCacheOpenGL::GetSurface(const CachedSurface& params, bo
                                  params.height * scaling, 0, GL_RGBA,
                                  GL_UNSIGNED_BYTE, tex_buffer_scaled.data());
                 } else {
-                    glTexImage2D(GL_TEXTURE_2D, 0, tuple.internal_format, params.width,
-                                 params.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, tex_buffer.data());
+                    DecodeTexture(params, texture_src_data, tuple);
                 }
             } else {
                 // Depth/Stencil formats need special treatment since they aren't sampleable using
