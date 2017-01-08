@@ -1,4 +1,7 @@
 set(SRCS
+            aes/aes.cpp
+            aes/aes_imp.cpp
+            aes/aes_secret.cpp
             arm/disassembler/arm_disasm.cpp
             arm/disassembler/load_symbol_map.cpp
             arm/dynarmic/arm_dynarmic.cpp
@@ -170,6 +173,7 @@ set(SRCS
             )
 
 set(HEADERS
+            aes/aes.h
             arm/arm_interface.h
             arm/disassembler/arm_disasm.h
             arm/disassembler/load_symbol_map.h
