@@ -20,15 +20,17 @@ set(SRCS
             util/spinbox.cpp
             util/util.cpp
             bootmanager.cpp
+            cheat_gui.cpp
             configure_audio.cpp
             configure_debug.cpp
             configure_dialog.cpp
             configure_general.cpp
             configure_graphics.cpp
-            configure_system.cpp
             configure_input.cpp
+            configure_system.cpp
             game_list.cpp
             hotkeys.cpp
+            keybinding_names.cpp
             main.cpp
             ui_settings.cpp
             citra-qt.rc
@@ -54,16 +56,18 @@ set(HEADERS
             util/spinbox.h
             util/util.h
             bootmanager.h
+            cheat_gui.h
             configure_audio.h
             configure_debug.h
             configure_dialog.h
             configure_general.h
             configure_graphics.h
-            configure_system.h
             configure_input.h
+            configure_system.h
             game_list.h
             game_list_p.h
             hotkeys.h
+            keybinding_names.h
             main.h
             ui_settings.h
             )
@@ -73,6 +77,7 @@ set(UIS
             debugger/disassembler.ui
             debugger/profiler.ui
             debugger/registers.ui
+            cheat_gui.ui
             configure.ui
             configure_audio.ui
             configure_debug.ui
@@ -80,6 +85,7 @@ set(UIS
             configure_graphics.ui
             configure_system.ui
             configure_input.ui
+            configure_system.ui
             hotkeys.ui
             main.ui
             )
@@ -100,7 +106,7 @@ if (APPLE)
 else()
     add_executable(citra-qt ${SRCS} ${HEADERS} ${UI_HDRS})
 endif()
-target_link_libraries(citra-qt core video_core audio_core common qhexedit)
+target_link_libraries(citra-qt core video_core audio_core input_core common qhexedit)
 target_link_libraries(citra-qt ${OPENGL_gl_LIBRARY} ${CITRA_QT_LIBS})
 target_link_libraries(citra-qt ${PLATFORM_LIBRARIES} Threads::Threads)
 

@@ -37,6 +37,10 @@ pad_circle_modifier =
 # Must be in range of 0.0-1.0. Defaults to 0.5
 pad_circle_modifier_scale =
 
+# Deadzone applied to the circle pad.
+# Must be in range of 0.0 - 1.0. Defaults to 0.3
+pad_circle_deadzone =
+
 [Core]
 # Whether to use the Just-In-Time (JIT) compiler for CPU emulation
 # 0: Interpreter (slow), 1 (default): JIT (fast)
@@ -51,9 +55,13 @@ use_hw_renderer =
 # 0: Interpreter (slow), 1 (default): JIT (fast)
 use_shader_jit =
 
-# Whether to use native 3DS screen resolution or to scale rendering resolution to the displayed screen size.
+# Whether to use native 3DS screen resolution or to scale rendering resolution by `resolution_factor`
 # 0 (default): Native, 1: Scaled
 use_scaled_resolution =
+
+# Resolution scale factor to use when `use_scaled_resolution` is enabled.
+# 0 (default): Auto (scales resolution to window size), otherwise a scale factor for the 3DS resolution
+resolution_factor =
 
 # Whether to enable V-Sync (caps the framerate at 60FPS) or not.
 # 0 (default): Off, 1: On
@@ -89,6 +97,22 @@ output_engine =
 # at the cost of increasing audio latency.
 # 0: No, 1 (default): Yes
 enable_audio_stretching =
+
+[Camera]
+# Which camera engine to use for the right outer camera
+# blank (default): a dummy camera that always returns black image
+camera_outer_right_name =
+
+# A config string for the right outer camera. Its meaning is defined by the camera engine
+camera_outer_right_config =
+
+# ... for the left outer camera
+camera_outer_left_name =
+camera_outer_left_config =
+
+# ... for the inner camera
+camera_inner_name =
+camera_inner_config =
 
 [Data Storage]
 # Whether to create a virtual SD card.

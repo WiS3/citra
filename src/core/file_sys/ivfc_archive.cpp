@@ -20,7 +20,7 @@ std::string IVFCArchive::GetName() const {
 ResultVal<std::unique_ptr<FileBackend>> IVFCArchive::OpenFile(const Path& path,
                                                               const Mode& mode) const {
     return MakeResult<std::unique_ptr<FileBackend>>(
-        std::make_unique<IVFCFile>(romfs_file, data_offset, data_size));
+        std::make_unique<IVFCFile>(romfs_file, data_offset, data_size, aes_context));
 }
 
 ResultCode IVFCArchive::DeleteFile(const Path& path) const {
@@ -85,12 +85,38 @@ u64 IVFCArchive::GetFreeBytes() const {
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
+u8 IVFCFile::ReadEncryptedByte(u64 offset) const {
+    u64 index = offset / 16;
+    u8 buf_offset = offset % 16;
+    if (!decrypt_buffered || index != buf_index) {
+        decrypt_buffered = true;
+        buf_index = index;
+        std::array<u8, 16> ctr = aes_context.ctr;
+        AES::AddCtr(ctr, index);
+        std::array<u8, 16> xorpad = AES::AesCipher(ctr, aes_context.key);
+        romfs_file->Seek(data_offset + index * 16, SEEK_SET);
+        romfs_file->ReadBytes(decrypt_buf.data(), 16);
+        for (int i = 0; i < 16; ++i)
+            decrypt_buf[i] ^= xorpad[i];
+    }
+    return decrypt_buf[buf_offset];
+}
+
 ResultVal<size_t> IVFCFile::Read(const u64 offset, const size_t length, u8* buffer) const {
     LOG_TRACE(Service_FS, "called offset=%llu, length=%zu", offset, length);
-    romfs_file->Seek(data_offset + offset, SEEK_SET);
+    if (!romfs_file)
+        return MakeResult<size_t>(0);
     size_t read_length = (size_t)std::min((u64)length, data_size - offset);
 
-    return MakeResult<size_t>(romfs_file->ReadBytes(buffer, read_length));
+    if (aes_context.encrypted) {
+        for (size_t i = 0; i < read_length; ++i) {
+            buffer[i] = ReadEncryptedByte(offset + i);
+        }
+        return MakeResult<size_t>(read_length);
+    } else {
+        romfs_file->Seek(data_offset + offset, SEEK_SET);
+        return MakeResult<size_t>(romfs_file->ReadBytes(buffer, read_length));
+    }
 }
 
 ResultVal<size_t> IVFCFile::Write(const u64 offset, const size_t length, const bool flush,

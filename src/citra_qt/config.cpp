@@ -23,18 +23,22 @@ const std::array<QVariant, Settings::NativeInput::NUM_INPUTS> Config::defaults =
     Qt::Key_K, Qt::Key_J, Qt::Key_L,
 
     // indirectly mapped keys
-    Qt::Key_Up, Qt::Key_Down, Qt::Key_Left, Qt::Key_Right, Qt::Key_D,
-};
+    Qt::Key_Up, Qt::Key_Down, Qt::Key_Left, Qt::Key_Right};
 
 void Config::ReadValues() {
     qt_config->beginGroup("Controls");
     for (int i = 0; i < Settings::NativeInput::NUM_INPUTS; ++i) {
         Settings::values.input_mappings[Settings::NativeInput::All[i]] =
-            qt_config->value(QString::fromStdString(Settings::NativeInput::Mapping[i]), defaults[i])
-                .toInt();
+            Settings::InputDeviceMapping(
+                qt_config->value(Settings::NativeInput::Mapping[i], defaults[i])
+                    .toString()
+                    .toStdString());
     }
+    Settings::values.pad_circle_modifier = Settings::InputDeviceMapping(
+        qt_config->value("pad_circle_modifier", 0).toString().toStdString());
     Settings::values.pad_circle_modifier_scale =
         qt_config->value("pad_circle_modifier_scale", 0.5).toFloat();
+    Settings::values.pad_circle_deadzone = qt_config->value("pad_circle_deadzone", 0.3f).toFloat();
     qt_config->endGroup();
 
     qt_config->beginGroup("Core");
@@ -46,6 +50,7 @@ void Config::ReadValues() {
     Settings::values.use_shader_jit = qt_config->value("use_shader_jit", true).toBool();
     Settings::values.use_scaled_resolution =
         qt_config->value("use_scaled_resolution", false).toBool();
+    Settings::values.resolution_factor = qt_config->value("resolution_factor", 0.0).toFloat();
     Settings::values.use_vsync = qt_config->value("use_vsync", false).toBool();
     Settings::values.toggle_framelimit = qt_config->value("toggle_framelimit", true).toBool();
 
@@ -64,6 +69,22 @@ void Config::ReadValues() {
     Settings::values.sink_id = qt_config->value("output_engine", "auto").toString().toStdString();
     Settings::values.enable_audio_stretching =
         qt_config->value("enable_audio_stretching", true).toBool();
+    qt_config->endGroup();
+
+    using namespace Service::CAM;
+    qt_config->beginGroup("Camera");
+    Settings::values.camera_name[OuterRightCamera] =
+        qt_config->value("camera_outer_right_name", "blank").toString().toStdString();
+    Settings::values.camera_config[OuterRightCamera] =
+        qt_config->value("camera_outer_right_config", "").toString().toStdString();
+    Settings::values.camera_name[InnerCamera] =
+        qt_config->value("camera_inner_name", "blank").toString().toStdString();
+    Settings::values.camera_config[InnerCamera] =
+        qt_config->value("camera_inner_config", "").toString().toStdString();
+    Settings::values.camera_name[OuterLeftCamera] =
+        qt_config->value("camera_outer_left_name", "blank").toString().toStdString();
+    Settings::values.camera_config[OuterLeftCamera] =
+        qt_config->value("camera_outer_left_config", "").toString().toStdString();
     qt_config->endGroup();
 
     qt_config->beginGroup("Data Storage");
@@ -138,11 +159,16 @@ void Config::ReadValues() {
 void Config::SaveValues() {
     qt_config->beginGroup("Controls");
     for (int i = 0; i < Settings::NativeInput::NUM_INPUTS; ++i) {
-        qt_config->setValue(QString::fromStdString(Settings::NativeInput::Mapping[i]),
-                            Settings::values.input_mappings[Settings::NativeInput::All[i]]);
+        qt_config->setValue(
+            QString::fromStdString(Settings::NativeInput::Mapping[i]),
+            QString::fromStdString(
+                Settings::values.input_mappings[Settings::NativeInput::All[i]].ToString()));
     }
+    qt_config->setValue("pad_circle_modifier",
+                        QString::fromStdString(Settings::values.pad_circle_modifier.ToString()));
     qt_config->setValue("pad_circle_modifier_scale",
                         (double)Settings::values.pad_circle_modifier_scale);
+    qt_config->setValue("pad_circle_deadzone", (double)Settings::values.pad_circle_deadzone);
     qt_config->endGroup();
 
     qt_config->beginGroup("Core");
@@ -153,6 +179,7 @@ void Config::SaveValues() {
     qt_config->setValue("use_hw_renderer", Settings::values.use_hw_renderer);
     qt_config->setValue("use_shader_jit", Settings::values.use_shader_jit);
     qt_config->setValue("use_scaled_resolution", Settings::values.use_scaled_resolution);
+    qt_config->setValue("resolution_factor", (double)Settings::values.resolution_factor);
     qt_config->setValue("use_vsync", Settings::values.use_vsync);
     qt_config->setValue("toggle_framelimit", Settings::values.toggle_framelimit);
 
@@ -170,6 +197,22 @@ void Config::SaveValues() {
     qt_config->beginGroup("Audio");
     qt_config->setValue("output_engine", QString::fromStdString(Settings::values.sink_id));
     qt_config->setValue("enable_audio_stretching", Settings::values.enable_audio_stretching);
+    qt_config->endGroup();
+
+    using namespace Service::CAM;
+    qt_config->beginGroup("Camera");
+    qt_config->setValue("camera_outer_right_name",
+                        QString::fromStdString(Settings::values.camera_name[OuterRightCamera]));
+    qt_config->setValue("camera_outer_right_config",
+                        QString::fromStdString(Settings::values.camera_config[OuterRightCamera]));
+    qt_config->setValue("camera_inner_name",
+                        QString::fromStdString(Settings::values.camera_name[InnerCamera]));
+    qt_config->setValue("camera_inner_config",
+                        QString::fromStdString(Settings::values.camera_config[InnerCamera]));
+    qt_config->setValue("camera_outer_left_name",
+                        QString::fromStdString(Settings::values.camera_name[OuterLeftCamera]));
+    qt_config->setValue("camera_outer_left_config",
+                        QString::fromStdString(Settings::values.camera_config[OuterLeftCamera]));
     qt_config->endGroup();
 
     qt_config->beginGroup("Data Storage");

@@ -31,9 +31,6 @@
 namespace GPU {
 
 Regs g_regs;
-
-/// 268MHz CPU clocks / 60Hz frames per second
-const u64 frame_ticks = 268123480ull / 60;
 /// Event id for CoreTiming
 static int vblank_event;
 /// Total number of frames drawn
@@ -276,7 +273,10 @@ static void DisplayTransfer(const Regs::DisplayTransferConfig& config) {
                                  out_coarse_y * out_stride;
                 }
             }
-
+                        if (!dst_pointer) {
+                            LOG_CRITICAL(HW_GPU, "Invalid address %08x", dst_pointer);
+                            break;
+                        }
             const u8* src_pixel = src_pointer + src_offset;
             src_color = DecodePixel(config.input_format, src_pixel);
             if (config.scaling == config.ScaleX) {
@@ -550,9 +550,6 @@ static void VBlankCallback(u64 userdata, int cycles_late) {
     // two different intervals.
     Service::GSP::SignalInterrupt(Service::GSP::InterruptId::PDC0);
     Service::GSP::SignalInterrupt(Service::GSP::InterruptId::PDC1);
-
-    // Check for user input updates
-    Service::HID::Update();
 
     if (!Settings::values.use_vsync && Settings::values.toggle_framelimit) {
         FrameLimiter();

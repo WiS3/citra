@@ -37,11 +37,84 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="toggle_scaled_resolution">
-          <property name="text">
-           <string>Enable scaled resolution</string>
-          </property>
-         </widget>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+              <widget class="QCheckBox" name="toggle_scaled_resolution">
+                <property name="text">
+                  <string>Enable scaled resolution</string>
+                </property>
+              </widget>
+            </item>
+            <item>
+              <widget class="QComboBox" name="resolution_factor_combobox">
+                <item>
+                  <property name="text">
+                    <string notr="true">Auto (Window Size)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string notr="true">Native (400x240)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string notr="true">1.5x Native (600x360)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string notr="true">2x Native (800x480)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string notr="true">2.5x Native (1000x600)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string notr="true">3x Native (1200x720)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string notr="true">4x Native (1600x960)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string notr="true">5x Native (2000x1200)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string notr="true">6x Native (2400x1440)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string notr="true">7x Native (2800x1680)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string notr="true">8x Native (3200x1920)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string notr="true">9x Native (3600x2160)</string>
+                  </property>
+                </item>
+                <item>
+                  <property name="text">
+                    <string notr="true">10x Native (4000x2400)</string>
+                  </property>
+                </item>
+              </widget>
+            </item>
+          </layout>
         </item>
         <item>
          <widget class="QCheckBox" name="toggle_vsync">
@@ -70,6 +143,21 @@
      <layout class="QHBoxLayout" name="horizontalLayout_3">
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QLabel" name="label2">
+            <property name="text">
+             <string>Background color:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="layout_bg">
+           </widget>
+          </item>
+         </layout>
+        </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
@@ -128,5 +216,12 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>toggle_scaled_resolution</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>resolution_factor_combobox</receiver>
+   <slot>setEnabled(bool)</slot>
+  </connection>
+ </connections>
 </ui>

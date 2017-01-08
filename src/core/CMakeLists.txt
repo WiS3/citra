@@ -1,4 +1,7 @@
 set(SRCS
+            aes/aes.cpp
+            aes/aes_imp.cpp
+            aes/aes_secret.cpp
             arm/disassembler/arm_disasm.cpp
             arm/disassembler/load_symbol_map.cpp
             arm/dynarmic/arm_dynarmic.cpp
@@ -13,6 +16,7 @@ set(SRCS
             arm/skyeye_common/vfp/vfpdouble.cpp
             arm/skyeye_common/vfp/vfpinstr.cpp
             arm/skyeye_common/vfp/vfpsingle.cpp
+            cheat_core.cpp
             core.cpp
             core_timing.cpp
             file_sys/archive_backend.cpp
@@ -29,8 +33,10 @@ set(SRCS
             file_sys/ivfc_archive.cpp
             file_sys/path_parser.cpp
             file_sys/savedata_archive.cpp
+            frontend/camera/blank_camera.cpp
+            frontend/camera/factory.cpp
+            frontend/camera/interface.cpp
             frontend/emu_window.cpp
-            frontend/key_map.cpp
             frontend/motion_emu.cpp
             gdbstub/gdbstub.cpp
             hle/config_mem.cpp
@@ -167,6 +173,7 @@ set(SRCS
             )
 
 set(HEADERS
+            aes/aes.h
             arm/arm_interface.h
             arm/disassembler/arm_disasm.h
             arm/disassembler/load_symbol_map.h
@@ -183,6 +190,7 @@ set(HEADERS
             arm/skyeye_common/vfp/asm_vfp.h
             arm/skyeye_common/vfp/vfp.h
             arm/skyeye_common/vfp/vfp_helper.h
+            cheat_core.h
             core.h
             core_timing.h
             file_sys/archive_backend.h
@@ -201,13 +209,16 @@ set(HEADERS
             file_sys/ivfc_archive.h
             file_sys/path_parser.h
             file_sys/savedata_archive.h
+            frontend/camera/blank_camera.h
+            frontend/camera/factory.h
+            frontend/camera/interface.h
             frontend/emu_window.h
-            frontend/key_map.h
             frontend/motion_emu.h
             gdbstub/gdbstub.h
             hle/config_mem.h
             hle/function_wrappers.h
             hle/ipc.h
+            hle/ipc_helpers.h
             hle/applets/applet.h
             hle/applets/erreula.h
             hle/applets/mii_selector.h

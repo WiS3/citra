@@ -45,17 +45,21 @@ static const std::array<int, Settings::NativeInput::NUM_INPUTS> defaults = {
     SDL_SCANCODE_L,
 
     // indirectly mapped keys
-    SDL_SCANCODE_UP, SDL_SCANCODE_DOWN, SDL_SCANCODE_LEFT, SDL_SCANCODE_RIGHT, SDL_SCANCODE_D,
-};
+    SDL_SCANCODE_UP, SDL_SCANCODE_DOWN, SDL_SCANCODE_LEFT, SDL_SCANCODE_RIGHT};
 
 void Config::ReadValues() {
     // Controls
     for (int i = 0; i < Settings::NativeInput::NUM_INPUTS; ++i) {
         Settings::values.input_mappings[Settings::NativeInput::All[i]] =
-            sdl2_config->GetInteger("Controls", Settings::NativeInput::Mapping[i], defaults[i]);
+            Settings::InputDeviceMapping(sdl2_config->Get(
+                "Controls", Settings::NativeInput::Mapping[i], std::to_string(defaults[i])));
     }
+    Settings::values.pad_circle_modifier =
+        Settings::InputDeviceMapping(sdl2_config->Get("Controls", "pad_circle_modifier", ""));
     Settings::values.pad_circle_modifier_scale =
         (float)sdl2_config->GetReal("Controls", "pad_circle_modifier_scale", 0.5);
+    Settings::values.pad_circle_deadzone =
+        (float)sdl2_config->GetReal("Controls", "pad_circle_deadzone", 0.3);
 
     // Core
     Settings::values.use_cpu_jit = sdl2_config->GetBoolean("Core", "use_cpu_jit", true);
@@ -65,6 +69,7 @@ void Config::ReadValues() {
     Settings::values.use_shader_jit = sdl2_config->GetBoolean("Renderer", "use_shader_jit", true);
     Settings::values.use_scaled_resolution =
         sdl2_config->GetBoolean("Renderer", "use_scaled_resolution", false);
+    Settings::values.resolution_factor = sdl2_config->GetReal("Renderer", "resolution_factor", 0.0);
     Settings::values.use_vsync = sdl2_config->GetBoolean("Renderer", "use_vsync", false);
     Settings::values.toggle_framelimit =
         sdl2_config->GetBoolean("Renderer", "toggle_framelimit", true);
@@ -91,6 +96,21 @@ void Config::ReadValues() {
     Settings::values.is_new_3ds = sdl2_config->GetBoolean("System", "is_new_3ds", false);
     Settings::values.region_value =
         sdl2_config->GetInteger("System", "region_value", Settings::REGION_VALUE_AUTO_SELECT);
+
+    // Camera
+    using namespace Service::CAM;
+    Settings::values.camera_name[OuterRightCamera] =
+        sdl2_config->Get("Camera", "camera_outer_right_name", "blank");
+    Settings::values.camera_config[OuterRightCamera] =
+        sdl2_config->Get("Camera", "camera_outer_right_config", "");
+    Settings::values.camera_name[InnerCamera] =
+        sdl2_config->Get("Camera", "camera_inner_name", "blank");
+    Settings::values.camera_config[InnerCamera] =
+        sdl2_config->Get("Camera", "camera_inner_config", "");
+    Settings::values.camera_name[OuterLeftCamera] =
+        sdl2_config->Get("Camera", "camera_outer_left_name", "blank");
+    Settings::values.camera_config[OuterLeftCamera] =
+        sdl2_config->Get("Camera", "camera_outer_left_config", "");
 
     // Miscellaneous
     Settings::values.log_filter = sdl2_config->Get("Miscellaneous", "log_filter", "*:Info");
