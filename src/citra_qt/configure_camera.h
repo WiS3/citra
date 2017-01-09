@@ -5,7 +5,9 @@
 #pragma once
 
 #include <memory>
+#include <QtGui>
 #include <QWidget>
+#include "droparea.h"
 
 namespace Ui {
 class ConfigureCamera;
@@ -19,6 +21,11 @@ public:
     ~ConfigureCamera();
 
     void applyConfiguration();
+
+private slots:
+    void OuterRightCameraModeChanged(int index);
+    void OuterLeftCameraModeChanged(int index);
+    void InnerCameraModeChanged(int index);
 
 private:
     void setConfiguration();

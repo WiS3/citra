@@ -12,32 +12,24 @@
           <item>
             <layout class="QHBoxLayout">
               <item>
-                <widget class="QLabel">
-                  <property name="text">
-                    <string>Camera mode:</string>
+                <layout class="QHBoxLayout">
+                  <property name="alignment">
+                    <set>Qt::AlignTop</set>
                   </property>
-                </widget>
+                  <item>
+                    <widget class="QLabel">
+                      <property name="text">
+                        <string>Camera mode:</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QComboBox" name="camera_outer_right_mode"></widget>
+                  </item>
+                </layout>
               </item>
               <item>
-                <widget class="QComboBox" name="camera_outer_right_name">
-                </widget>
-              </item>
-            </layout>
-          </item>
-          <item>
-            <layout class="QHBoxLayout">
-              <item>
-                <widget class="QLabel" name="label_outer_right_camera">
-                  <property name="text">
-                    <string></string>
-                  </property>
-                  <property name="toolTip">
-                    <string>Image filepath for rear right camera</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="0" column="1">
-                <widget class="QLineEdit" name="camera_outer_right_config"></widget>
+                <widget class="DropArea" name="camera_outer_right_drop_area"></widget>
               </item>
             </layout>
           </item>
@@ -53,32 +45,24 @@
           <item>
             <layout class="QHBoxLayout">
               <item>
-                <widget class="QLabel">
-                  <property name="text">
-                    <string>Camera mode:</string>
+                <layout class="QHBoxLayout">
+                  <property name="alignment">
+                    <set>Qt::AlignTop</set>
                   </property>
-                </widget>
+                  <item>
+                    <widget class="QLabel">
+                      <property name="text">
+                        <string>Camera mode:</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QComboBox" name="camera_outer_left_mode"></widget>
+                  </item>
+                </layout>
               </item>
               <item>
-                <widget class="QComboBox" name="camera_outer_left_name">
-                </widget>
-              </item>
-            </layout>
-          </item>
-          <item>
-            <layout class="QHBoxLayout">
-              <item>
-                <widget class="QLabel" name="label_outer_left_camera">
-                  <property name="text">
-                    <string></string>
-                  </property>
-                  <property name="toolTip">
-                    <string>Image filepath for rear left camera</string>
-                  </property>
-                </widget>
-              </item>
-              <item row="0" column="1">
-                <widget class="QLineEdit" name="camera_outer_left_config"></widget>
+                <widget class="DropArea" name="camera_outer_left_drop_area"></widget>
               </item>
             </layout>
           </item>
@@ -94,32 +78,24 @@
           <item>
             <layout class="QHBoxLayout">
               <item>
-                <widget class="QLabel">
-                  <property name="text">
-                    <string>Camera mode:</string>
+                <layout class="QHBoxLayout">
+                  <property name="alignment">
+                    <set>Qt::AlignTop</set>
                   </property>
-                </widget>
+                  <item>
+                    <widget class="QLabel">
+                      <property name="text">
+                        <string>Camera mode:</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
+                    <widget class="QComboBox" name="camera_inner_mode"></widget>
+                  </item>
+                </layout>
               </item>
               <item>
-                <widget class="QComboBox" name="camera_inner_name">
-                </widget>
-              </item>
-            </layout>
-          </item>
-          <item>
-            <layout class="QHBoxLayout">
-              <item>
-              <widget class="QLabel" name="label_front_camera">
-                <property name="text">
-                  <string></string>
-                </property>
-                <property name="toolTip">
-                  <string>Image filepath for front camera</string>
-                </property>
-              </widget>
-              </item>
-              <item row="0" column="1">
-                <widget class="QLineEdit" name="camera_inner_config"></widget>
+                <widget class="DropArea" name="camera_inner_drop_area"></widget>
               </item>
             </layout>
           </item>
@@ -127,7 +103,7 @@
       </widget>
     </item>
     <item>
-    <spacer>
+      <spacer>
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -138,9 +114,9 @@
       </size>
      </property>
     </spacer>
-   </item>
+    </item>
   </layout>
- </widget>
- <resources />
- <connections />
+  </widget>
+  <resources />
+  <connections />
 </ui>

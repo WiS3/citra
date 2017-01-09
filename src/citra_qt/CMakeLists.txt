@@ -18,6 +18,7 @@ set(SRCS
             debugger/ramview.cpp
             debugger/registers.cpp
             debugger/wait_tree.cpp
+            droparea.cpp
             util/spinbox.cpp
             util/util.cpp
             bootmanager.cpp
@@ -56,6 +57,7 @@ set(HEADERS
             debugger/ramview.h
             debugger/registers.h
             debugger/wait_tree.h
+            droparea.h
             util/spinbox.h
             util/util.h
             bootmanager.h
