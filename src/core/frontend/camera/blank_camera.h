@@ -27,7 +27,7 @@ private:
 
 class BlankCameraFactory final : public CameraFactory {
 public:
-    std::unique_ptr<CameraInterface> Create(const std::string& config) const override;
+    std::unique_ptr<CameraInterface> Create(int camera_id) const override;
 };
 
 } // namespace Camera

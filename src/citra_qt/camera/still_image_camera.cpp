@@ -4,10 +4,11 @@
 
 #include "citra_qt/camera/still_image_camera.h"
 #include "common/math_util.h"
+#include "core/settings.h"
 
 namespace Camera {
 
-StillImageCamera::StillImageCamera(QImage image_) : image(image_) {}
+StillImageCamera::StillImageCamera(int camera_id_) : camera_id(camera_id_) {}
 
 void StillImageCamera::StartCapture(){};
 
@@ -35,8 +36,10 @@ void StillImageCamera::SetEffect(Service::CAM::Effect effect) {
 }
 
 std::vector<u16> StillImageCamera::ReceiveFrame() const {
-    std::vector<u16> buffer(width * height);
+    const std::string camera_config = Settings::values.camera_config[camera_id];
+    QImage image(QString::fromStdString(camera_config));
     if (!image.isNull()) {
+        std::vector<u16> buffer(width * height);
         QImage scaled =
             image.scaled(width, height, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
         QImage transformed =
@@ -78,16 +81,19 @@ std::vector<u16> StillImageCamera::ReceiveFrame() const {
                 }
             }
         }
+        return buffer;
     }
-    return buffer;
+    return std::vector<u16>(width * height, output_rgb ? 0 : 0x8000);
 }
 
-std::unique_ptr<CameraInterface> StillImageCameraFactory::Create(const std::string& config) const {
-    QImage image(QString::fromStdString(config));
+std::unique_ptr<CameraInterface> StillImageCameraFactory::Create(int _camera_id) const {
+    const std::string camera_config = Settings::values.camera_config[_camera_id];
+    int camera_id = _camera_id;
+    QImage image(QString::fromStdString(camera_config));
     if (image.isNull()) {
-        LOG_ERROR(Service_CAM, "Couldn't load image \"%s\"", config.c_str());
+        LOG_ERROR(Service_CAM, "Couldn't load image \"%s\"", camera_config.c_str());
     }
-    return std::make_unique<StillImageCamera>(image);
+    return std::make_unique<StillImageCamera>(camera_id);
 }
 
 } // namespace Camera

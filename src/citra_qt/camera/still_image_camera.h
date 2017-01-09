@@ -12,7 +12,7 @@ namespace Camera {
 
 class StillImageCamera final : public CameraInterface {
 public:
-    StillImageCamera(QImage image);
+    StillImageCamera(int camera_id);
     void StartCapture() override;
     void StopCapture() override;
     void SetResolution(const Service::CAM::Resolution&) override;
@@ -22,7 +22,7 @@ public:
     std::vector<u16> ReceiveFrame() const override;
 
 private:
-    QImage image;
+    int camera_id;
     int width, height;
     bool output_rgb;
     bool flip_horizontal, flip_vertical;
@@ -30,7 +30,7 @@ private:
 
 class StillImageCameraFactory final : public CameraFactory {
 public:
-    std::unique_ptr<CameraInterface> Create(const std::string& config) const override;
+    std::unique_ptr<CameraInterface> Create(int _camera_id) const override;
 };
 
 } // namespace Camera
