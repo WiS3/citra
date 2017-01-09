@@ -23,6 +23,7 @@ set(SRCS
             bootmanager.cpp
             cheat_gui.cpp
             configure_audio.cpp
+            configure_camera.cpp
             configure_debug.cpp
             configure_dialog.cpp
             configure_general.cpp
@@ -60,6 +61,7 @@ set(HEADERS
             bootmanager.h
             cheat_gui.h
             configure_audio.h
+            configure_camera.h
             configure_debug.h
             configure_dialog.h
             configure_general.h
@@ -82,6 +84,7 @@ set(UIS
             cheat_gui.ui
             configure.ui
             configure_audio.ui
+            configure_camera.ui
             configure_debug.ui
             configure_general.ui
             configure_graphics.ui

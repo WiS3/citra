@@ -659,7 +659,6 @@ int main(int argc, char* argv[]) {
     // After settings have been loaded by GMainWindow, apply the filter
     log_filter.ParseFilterString(Settings::values.log_filter);
 
-    Camera::Init();
     Camera::RegisterFactory("image", std::make_unique<Camera::StillImageCameraFactory>());
 
     main_window.show();

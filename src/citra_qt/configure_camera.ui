@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui version="4.0">
+ <class>ConfigureCamera</class>
+ <widget class="QWidget" name="ConfigureCamera">
+  <layout class="QVBoxLayout">
+    <item>
+      <widget class="QGroupBox">
+        <property name="title">
+          <string>Rear Right Camera</string>
+        </property>
+        <layout class="QVBoxLayout">
+          <item>
+            <layout class="QHBoxLayout">
+              <item>
+                <widget class="QLabel">
+                  <property name="text">
+                    <string>Camera mode:</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QComboBox" name="camera_outer_right_name">
+                </widget>
+              </item>
+            </layout>
+          </item>
+          <item>
+            <layout class="QHBoxLayout">
+              <item>
+                <widget class="QLabel" name="label_outer_right_camera">
+                  <property name="text">
+                    <string></string>
+                  </property>
+                  <property name="toolTip">
+                    <string>Image filepath for rear right camera</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="0" column="1">
+                <widget class="QLineEdit" name="camera_outer_right_config"></widget>
+              </item>
+            </layout>
+          </item>
+        </layout>
+      </widget>
+    </item>
+    <item>
+      <widget class="QGroupBox">
+        <property name="title">
+          <string>Rear Left Camera</string>
+        </property>
+        <layout class="QVBoxLayout">
+          <item>
+            <layout class="QHBoxLayout">
+              <item>
+                <widget class="QLabel">
+                  <property name="text">
+                    <string>Camera mode:</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QComboBox" name="camera_outer_left_name">
+                </widget>
+              </item>
+            </layout>
+          </item>
+          <item>
+            <layout class="QHBoxLayout">
+              <item>
+                <widget class="QLabel" name="label_outer_left_camera">
+                  <property name="text">
+                    <string></string>
+                  </property>
+                  <property name="toolTip">
+                    <string>Image filepath for rear left camera</string>
+                  </property>
+                </widget>
+              </item>
+              <item row="0" column="1">
+                <widget class="QLineEdit" name="camera_outer_left_config"></widget>
+              </item>
+            </layout>
+          </item>
+        </layout>
+      </widget>
+    </item>
+    <item>
+      <widget class="QGroupBox">
+        <property name="title">
+          <string>Front Camera</string>
+        </property>
+        <layout class="QVBoxLayout">
+          <item>
+            <layout class="QHBoxLayout">
+              <item>
+                <widget class="QLabel">
+                  <property name="text">
+                    <string>Camera mode:</string>
+                  </property>
+                </widget>
+              </item>
+              <item>
+                <widget class="QComboBox" name="camera_inner_name">
+                </widget>
+              </item>
+            </layout>
+          </item>
+          <item>
+            <layout class="QHBoxLayout">
+              <item>
+              <widget class="QLabel" name="label_front_camera">
+                <property name="text">
+                  <string></string>
+                </property>
+                <property name="toolTip">
+                  <string>Image filepath for front camera</string>
+                </property>
+              </widget>
+              </item>
+              <item row="0" column="1">
+                <widget class="QLineEdit" name="camera_inner_config"></widget>
+              </item>
+            </layout>
+          </item>
+        </layout>
+      </widget>
+    </item>
+    <item>
+    <spacer>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources />
+ <connections />
+</ui>
