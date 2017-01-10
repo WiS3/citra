@@ -176,6 +176,16 @@ void Source::ParseConfig(SourceConfiguration::Configuration& config,
                   config.physical_address, config.length, config.buffer_id);
     }
 
+    if (config.loop_related_dirty && config.loop_related != 0) {
+        LOG_WARNING(Audio_DSP, "Unhandled complex loop with loop_related=0x%08x",
+                    static_cast<u32>(config.loop_related));
+    }
+
+    if (config.play_position_dirty && config.play_position != 0) {
+        LOG_WARNING(Audio_DSP, "Unhandled complex loop with play_position=0x%08x",
+                    static_cast<u32>(config.play_position));
+    }
+
     if (config.buffer_queue_dirty) {
         config.buffer_queue_dirty.Assign(0);
         for (size_t i = 0; i < 4; i++) {
@@ -248,15 +258,14 @@ bool Source::DequeueBuffer() {
         return false;
 
     const Buffer buf = state.input_queue.top();
-    state.input_queue.pop();
+
+    if (!buf.is_looping) {
+        state.input_queue.pop();
+    }
 
     if (buf.adpcm_dirty) {
         state.adpcm_state.yn1 = buf.adpcm_yn[0];
         state.adpcm_state.yn2 = buf.adpcm_yn[1];
-    }
-
-    if (buf.is_looping) {
-        LOG_ERROR(Audio_DSP, "Looped buffers are unimplemented at the moment");
     }
 
     const u8* const memory = Memory::GetPhysicalPointer(buf.physical_address);
@@ -307,8 +316,8 @@ bool Source::DequeueBuffer() {
 
     state.current_sample_number = 0;
     state.next_sample_number = 0;
+    state.buffer_update = buf.from_queue && (state.current_buffer_id != buf.buffer_id);
     state.current_buffer_id = buf.buffer_id;
-    state.buffer_update = buf.from_queue;
 
     LOG_TRACE(Audio_DSP, "source_id=%zu buffer_id=%hu from_queue=%s current_buffer.size()=%zu",
               source_id, buf.buffer_id, buf.from_queue ? "true" : "false",
