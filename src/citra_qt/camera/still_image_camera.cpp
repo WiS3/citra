@@ -82,18 +82,14 @@ std::vector<u16> StillImageCamera::ReceiveFrame() const {
             }
         }
         return buffer;
+    } else {
+        LOG_ERROR(Service_CAM, "Couldn't load image \"%s\"", camera_config.c_str());
+        return std::vector<u16>(width * height, output_rgb ? 0 : 0x8000);
     }
-    return std::vector<u16>(width * height, output_rgb ? 0 : 0x8000);
 }
 
 std::unique_ptr<CameraInterface> StillImageCameraFactory::Create(int _camera_id) const {
-    const std::string camera_config = Settings::values.camera_config[_camera_id];
-    int camera_id = _camera_id;
-    QImage image(QString::fromStdString(camera_config));
-    if (image.isNull()) {
-        LOG_ERROR(Service_CAM, "Couldn't load image \"%s\"", camera_config.c_str());
-    }
-    return std::make_unique<StillImageCamera>(camera_id);
+    return std::make_unique<StillImageCamera>(_camera_id);
 }
 
 } // namespace Camera
