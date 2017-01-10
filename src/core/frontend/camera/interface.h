@@ -7,10 +7,11 @@
 #include <vector>
 #include "common/common_types.h"
 #include "core/hle/service/cam/cam.h"
+#include "core/hle/service/y2r_u.h"
 
 namespace Camera {
 
-/// An abstract class standing for a camera. All camera implementations should inherit from this.
+/// An abstract class standing for a camera. All camera implementation should inherit from this.
 class CameraInterface {
 public:
     virtual ~CameraInterface();
@@ -32,7 +33,8 @@ public:
     virtual void SetResolution(const Service::CAM::Resolution& resolution) = 0;
 
     /**
-     * Configures how received frames should be flipped by the camera.
+     * Sets the vertical and horizontal flip applied to all frames received after this function is
+     * called.
      * @param flip Flip applying to the frame
      */
     virtual void SetFlip(Service::CAM::Flip flip) = 0;

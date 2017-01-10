@@ -1,26 +1,3 @@
-# lemonbot merge log
-
-Scroll down for the original README.md!
-
-======
-
-|   PR | Ref                  | Commit                                     | Author      | Status   |
-|-----:|:---------------------|:-------------------------------------------|:------------|:---------|
-|   19 | pipe3                | `8f51d9522c670158b9517df3af236f24b8c6c31f` | MerryMage   | Merged   |
-|   17 | bleeding-edge-base   | `087bd4645cefbb6f7dd1f52c43214d962625ae6d` | jroweboy    | Merged   |
-|    5 | jfr-fix-batch-errors | `4f4326d0cf0f7a5e23057df89acf8f0aafa19f41` | jroweboy    | Merged   |
-| 2397 | pulse                | `e52ca85711e8df54c8eafe556b6ba0ca683ddea0` | Subv        | Merged   |
-| 2384 | internal-res-option  | `72d9bfb00dbdcb3952a48f73bf57d5bfe193c6e7` | bunnei      | Merged   |
-| 2368 | camera-2             | `00d443aea7b60a75058ba9008bdd6b10a68d12c0` | wwylele     | Merged   |
-| 2346 | shader-refactor2     | `b75239f94caaa962b85c4fe38ca1de475567ea16` | yuriks      | Merged   |
-| 2063 | CheatsModule         | `6c479adbf25e96b10c3be10021a0a2d77251dd7a` | makotech222 | Merged   |
-| 2027 | ipcrefactor          | `ee6e88fdb592b442bf433acb6dbbc2d48568d2a3` | Lectem      | Merged   |
-| 1951 | motion-sensor        | `d7d40b3c56df8e31d018477a5bd2abe3a6e4e550` | wwylele     | Merged   |
-
-End of merge log. You can find the original README.md below the break.
-
-======
-
 **BEFORE FILING AN ISSUE, READ THE RELEVANT SECTION IN THE [CONTRIBUTING](https://github.com/citra-emu/citra/blob/master/CONTRIBUTING.md#reporting-issues) FILE!!!**
 
 Citra Emulator

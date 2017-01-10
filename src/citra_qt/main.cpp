@@ -14,6 +14,7 @@
 #include <QtGui>
 #include "citra_qt/bootmanager.h"
 #include "citra_qt/cheat_gui.h"
+#include "citra_qt/camera/still_image_camera.h"
 #include "citra_qt/config.h"
 #include "citra_qt/configure_dialog.h"
 #include "citra_qt/debugger/callstack.h"
@@ -44,6 +45,7 @@
 #include "core/arm/disassembler/load_symbol_map.h"
 #include "core/core.h"
 #include "core/file_sys/archive_source_sd_savedata.h"
+#include "core/frontend/camera/camera.h"
 #include "core/gdbstub/gdbstub.h"
 #include "core/loader/loader.h"
 #include "core/settings.h"
@@ -656,6 +658,8 @@ int main(int argc, char* argv[]) {
     GMainWindow main_window;
     // After settings have been loaded by GMainWindow, apply the filter
     log_filter.ParseFilterString(Settings::values.log_filter);
+
+    Camera::RegisterFactory("image", std::make_unique<Camera::StillImageCameraFactory>());
 
     main_window.show();
     return app.exec();

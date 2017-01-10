@@ -3,6 +3,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CMakeModules)
 
 set(SRCS
+            camera/still_image_camera.cpp
             config.cpp
             debugger/callstack.cpp
             debugger/disassembler.cpp
@@ -17,11 +18,13 @@ set(SRCS
             debugger/ramview.cpp
             debugger/registers.cpp
             debugger/wait_tree.cpp
+            droparea.cpp
             util/spinbox.cpp
             util/util.cpp
             bootmanager.cpp
             cheat_gui.cpp
             configure_audio.cpp
+            configure_camera.cpp
             configure_debug.cpp
             configure_dialog.cpp
             configure_general.cpp
@@ -38,6 +41,7 @@ set(SRCS
             )
 
 set(HEADERS
+            camera/still_image_camera.h
             config.h
             debugger/callstack.h
             debugger/disassembler.h
@@ -53,11 +57,13 @@ set(HEADERS
             debugger/ramview.h
             debugger/registers.h
             debugger/wait_tree.h
+            droparea.h
             util/spinbox.h
             util/util.h
             bootmanager.h
             cheat_gui.h
             configure_audio.h
+            configure_camera.h
             configure_debug.h
             configure_dialog.h
             configure_general.h
@@ -80,6 +86,7 @@ set(UIS
             cheat_gui.ui
             configure.ui
             configure_audio.ui
+            configure_camera.ui
             configure_debug.ui
             configure_general.ui
             configure_graphics.ui
