@@ -55,9 +55,10 @@ use_hw_renderer =
 # 0: Interpreter (slow), 1 (default): JIT (fast)
 use_shader_jit =
 
-# Whether to use native 3DS screen resolution or to scale rendering resolution by `resolution_factor`
-# 0 (default): Native, 1: Scaled
-use_scaled_resolution =
+# Resolution scale factor
+# 0: Auto (scales resolution to window size), 1: Native 3DS screen resolution, Otherwise a scale
+# factor for the 3DS resolution
+resolution_factor =
 
 # Resolution scale factor to use when `use_scaled_resolution` is enabled.
 # 0 (default): Auto (scales resolution to window size), otherwise a scale factor for the 3DS resolution

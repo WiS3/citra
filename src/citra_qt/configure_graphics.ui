@@ -37,11 +37,25 @@
          </widget>
         </item>
         <item>
+         <widget class="QCheckBox" name="toggle_vsync">
+          <property name="text">
+           <string>Enable V-Sync</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="toggle_framelimit">
+          <property name="text">
+           <string>Limit framerate</string>
+          </property>
+         </widget>
+        </item>
+        <item>
           <layout class="QHBoxLayout" name="horizontalLayout">
             <item>
-              <widget class="QCheckBox" name="toggle_scaled_resolution">
+              <widget class="QLabel" name="label">
                 <property name="text">
-                  <string>Enable scaled resolution</string>
+                  <string>Internal Resolution:</string>
                 </property>
               </widget>
             </item>
@@ -59,17 +73,7 @@
                 </item>
                 <item>
                   <property name="text">
-                    <string notr="true">1.5x Native (600x360)</string>
-                  </property>
-                </item>
-                <item>
-                  <property name="text">
                     <string notr="true">2x Native (800x480)</string>
-                  </property>
-                </item>
-                <item>
-                  <property name="text">
-                    <string notr="true">2.5x Native (1000x600)</string>
                   </property>
                 </item>
                 <item>
@@ -115,20 +119,6 @@
               </widget>
             </item>
           </layout>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="toggle_vsync">
-          <property name="text">
-           <string>Enable V-Sync</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QCheckBox" name="toggle_framelimit">
-          <property name="text">
-           <string>Limit framerate</string>
-          </property>
-         </widget>
         </item>
        </layout>
       </widget>
@@ -218,7 +208,7 @@
  <resources/>
  <connections>
   <connection>
-   <sender>toggle_scaled_resolution</sender>
+   <sender>toggle_hw_renderer</sender>
    <signal>toggled(bool)</signal>
    <receiver>resolution_factor_combobox</receiver>
    <slot>setEnabled(bool)</slot>
